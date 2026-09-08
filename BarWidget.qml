@@ -216,14 +216,13 @@ BarWidget {
           var mon = modelData && modelData.monitor ? root.connectorName(modelData.monitor) : ""
           return mon !== "" && root.thisMonitorName !== "" && mon === root.thisMonitorName
         }
-        readonly property bool there: onScreen && !isThis
         readonly property string numberText: workspaceId === 10 ? "0" : String(workspaceId)
 
         bar: root.bar
         text: {
           if (isSep) return root.pillText("|")
           if (isLabel) return root.pillText(modelData.text)
-          if (there) return root.pillText("[" + numberText + "]")
+          if (onScreen) return root.pillText("[" + numberText + "]")
           return root.pillText(numberText)
         }
         active: false
@@ -234,7 +233,7 @@ BarWidget {
         tooltipText: root.tooltipFor(modelData)
         horizontalMargin: isSep ? 2 : 6
         verticalPadding: 6
-        fixedWidth: root.vertical ? root.barSize : (isSep ? Style.space(10) : (there ? Style.space(28) : Style.space(20)))
+        fixedWidth: root.vertical ? root.barSize : (isSep ? Style.space(10) : (onScreen ? Style.space(28) : Style.space(20)))
         fixedHeight: root.barSize
         onPressed: function() {
           if (isWs) root.focusWorkspace(workspaceId)

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "jordan.workspaces",
   "name": "Workspaces by monitor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Jordan Partridge",
   "license": "MIT",
   "homepage": "https://github.com/jordanpartridge/omarchy-workspaces",
