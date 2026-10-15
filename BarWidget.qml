@@ -66,7 +66,8 @@ BarWidget {
 
   function pillText(value) {
     var text = String(value || "")
-    if (!/^[0-9LRTB|[\]]{1,8}$/.test(text)) return ""
+    // Closed set: a digit, a monitor letter, a separator, or a bracketed digit.
+    if (!/^(?:[0-9A-H]|[LRT]|\||\[[0-9]\])$/.test(text)) return ""
     return text
   }
 
@@ -97,14 +98,17 @@ BarWidget {
   }
 
   function monitorTag(index, monitors) {
+    // One screen needs no prefix: a leading "1" reads as workspace 1.
+    if (monitors.length <= 1) return ""
     if (monitors.length === 2) {
       var dx = Math.abs((monitors[1].x || 0) - (monitors[0].x || 0))
       var dy = Math.abs((monitors[1].y || 0) - (monitors[0].y || 0))
       if (dy > dx) return index === 0 ? "T" : "B"
       return index === 0 ? "L" : "R"
     }
-    if (index < 0 || index > 8) return ""
-    return String(index + 1)
+    var letters = "ABCDEFGH"
+    if (index < 0 || index >= letters.length) return ""
+    return letters.charAt(index)
   }
 
   function monitorPhrase(tag) {
@@ -112,6 +116,7 @@ BarWidget {
     if (tag === "R") return "right screen"
     if (tag === "T") return "top screen"
     if (tag === "B") return "bottom screen"
+    if (!tag) return "screen"
     return "screen " + tag
   }
 
@@ -136,19 +141,27 @@ BarWidget {
       idsByName[name].push(id)
     }
 
+    var visible = []
+    for (i = 0; i < monitors.length; i++) {
+      var candidate = root.connectorName(monitors[i].name)
+      var candidateIds = idsByName[candidate] || []
+      if (candidateIds.length === 0) continue
+      candidateIds.sort(function(left, right) { return left - right })
+      idsByName[candidate] = candidateIds
+      visible.push(monitors[i])
+    }
+
     var out = []
     var shown = 0
-    for (i = 0; i < monitors.length; i++) {
+    for (i = 0; i < visible.length; i++) {
       if (out.length >= root.maxItems) break
-      var monName = root.connectorName(monitors[i].name)
+      var monName = root.connectorName(visible[i].name)
       var ids = idsByName[monName] || []
-      if (ids.length === 0) continue
-      ids.sort(function(left, right) { return left - right })
-      var tag = root.monitorTag(i, monitors)
-      var activeWs = monitors[i].activeWorkspace
+      var tag = root.monitorTag(i, visible)
+      var activeWs = visible[i].activeWorkspace
       var activeId = activeWs ? activeWs.id : -1
       if (shown > 0) out.push({ kind: "sep" })
-      out.push({ kind: "label", text: tag, monitor: monName })
+      if (tag !== "") out.push({ kind: "label", text: tag, monitor: monName })
       for (var n = 0; n < ids.length; n++) {
         if (out.length >= root.maxItems) break
         out.push({
@@ -167,7 +180,8 @@ BarWidget {
   function focusWorkspace(id) {
     var n = Number(id)
     if (n !== n || n < 1 || n > root.maxWorkspaceId || Math.floor(n) !== n) return
-    Hyprland.dispatch("workspace " + n)
+    // Omarchy evaluates dispatch as Lua. "workspace N" is a syntax error there.
+    Hyprland.dispatch("hl.dsp.focus({ workspace = " + n + " })")
   }
 
   function tooltipFor(item) {

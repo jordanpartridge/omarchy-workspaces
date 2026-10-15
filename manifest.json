@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "id": "jordan.workspaces",
   "name": "Workspaces by monitor",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Jordan Partridge",
   "license": "MIT",
   "homepage": "https://github.com/jordanpartridge/omarchy-workspaces",
-  "description": "Bar workspace pills grouped by monitor. Plain number is this screen. Brackets are the other screen.",
+  "description": "Workspace numbers grouped by monitor. Brackets mark the workspace that screen is showing.",
   "kinds": [
     "bar-widget"
   ],
